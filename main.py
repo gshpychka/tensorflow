@@ -60,7 +60,6 @@ def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
     return features, labels
 
 
-
 def train_model(learning_rate, steps, batch_size, input_feature):
     """Trains a linear regression model.
 
@@ -90,15 +89,15 @@ def train_model(learning_rate, steps, batch_size, input_feature):
     feature_columns = [tf.feature_column.numeric_column(my_feature)]
 
     # Create a linear regressor object
-    my_optimizer = tf.train.Gradient_DescentOptimizer(learning_rate=learning_rate)
-    my_optimizer = tf.contriv.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
+    my_optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+    my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
     linear_regressor = tf.estimator.LinearRegressor(
         feature_columns=feature_columns,
         optimizer=my_optimizer
     )
 
     # Set up to plot the state of our model's line each period
-    plt.figure(figsize=(15,6))
+    plt.figure(figsize=(15, 6))
     plt.subplot(1, 2, 1)
     plt.title("Learned Line by Period")
     plt.ylabel(my_label)
@@ -112,15 +111,15 @@ def train_model(learning_rate, steps, batch_size, input_feature):
     print("Training model, stand by for science...")
     print("RMSE (on training data): ")
     root_mean_squared_errors = []
-    for period in range (0, periods):
+    for period in range(0, periods):
         # Train the model, starting from the prior state
         linear_regressor.train(
-            input_fn=my_input_fn,
+            input_fn=training_input_fn,
             steps=steps_per_period
         )
         # Tale a break and compute predictions
         predictions = linear_regressor.predict(input_fn=predict_training_input_fn)
-        prediction = np.array([item['predictions'][0] for item in predictions])
+        predictions = np.array([item['predictions'][0] for item in predictions])
 
         # Compute loss
         root_mean_squared_error = math.sqrt(
@@ -148,27 +147,36 @@ def train_model(learning_rate, steps, batch_size, input_feature):
 
         y_extents = bias + weight * x_extents
         plt.plot(x_extents, y_extents, color=colors[period])
-        print("Model training finished.")
+    print("Model training finished.")
 
-        # Output a graph of loss metrics over periods.
-        plt.subplot(1, 2, 2)
-        plt.ylabel('RMSE')
-        plt.xlabel('Periods')
-        plt.title("Root Mean Squared Error vs Periods")
-        plt.tight_layout()
-        plt.plot(root_mean_squared_errors)
+    # Output a graph of loss metrics over periods.
+    plt.subplot(1, 2, 2)
+    plt.ylabel('RMSE')
+    plt.xlabel('Periods')
+    plt.title("Root Mean Squared Error vs Periods")
+    plt.tight_layout()
+    plt.plot(root_mean_squared_errors)
 
-        # Create a table with calibration data.
-        calibration_data = pd.DataFrame()
-        calibration_data["predictions"] = pd.Series(predictions)
-        calibration_data["targets"] = pd.Series(targets)
-        display.display(calibration_data.describe())
+    # Create a table with calibration data.
+    calibration_data = pd.DataFrame()
+    calibration_data["predictions"] = pd.Series(predictions)
+    calibration_data["targets"] = pd.Series(targets)
+    display.display(calibration_data.describe())
 
-        print("Final RMSE (on training data): %0.2f" % root_mean_squared_error)
+    print("Final RMSE (on training data): %0.2f" % root_mean_squared_error)
 
-        return calibration_data
+    return calibration_data
 
-    
+
+california_housing_dataframe["rooms_per_person"] = california_housing_dataframe["total_rooms"] \
+                                                       / california_housing_dataframe["population"]
+calibration_data = train_model(learning_rate=0.05,
+                               steps=500,
+                               batch_size=5,
+                               input_feature="rooms_per_person"
+                               )
+
+
 
 
 
