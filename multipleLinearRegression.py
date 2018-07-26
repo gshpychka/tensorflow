@@ -249,11 +249,30 @@ def train_model(
 
 
 linear_regressor = train_model(
-    # TWEAK THESE VALUES TO SEE HOW MUCH YOU CAN IMPROVE THE RMSE
-    learning_rate=0.00001,
-    steps=100,
-    batch_size=1,
+    learning_rate=0.00003,
+    steps=500,
+    batch_size=5,
     training_examples=training_examples,
     training_targets=training_targets,
     validation_examples=validation_examples,
     validation_targets=validation_targets)
+
+california_housing_test_data = pd.read_csv("https://dl.google.com/mlcc/mledu-datasets/california_housing_test.csv", sep=",")
+
+test_examples = preprocess_features(california_housing_test_data)
+test_targets = preprocess_targets(california_housing_test_data)
+
+predict_test_input_fn = lambda: my_input_fn(
+    features=test_examples,
+    targets=test_targets["median_house_value"],
+    num_epochs=1,
+    shuffle=False
+)
+
+test_predictions = linear_regressor.predict(input_fn=predict_test_input_fn)
+test_predictions = np.array([item['predictions'][0] for item in test_predictions])
+
+test_root_mean_squared_error = math.sqrt(
+    metrics.mean_squared_error(test_predictions, test_targets))
+
+print("Test RMSE: %0.2f" % test_root_mean_squared_error)
