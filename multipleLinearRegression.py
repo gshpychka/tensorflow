@@ -290,14 +290,32 @@ assert minimal_features, "Must select at least one feature!"
 minimal_training_examples = training_examples[minimal_features]
 minimal_validation_examples = validation_examples[minimal_features]
 
-#%% Train with minimal features
+#%% Latitude binning
+
+LATITUDE_RANGES = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
+
+
+def select_and_transform_features(source_df):
+    selected_examples = pd.DataFrame()
+    selected_examples["median_income"] = source_df['median_income']
+    for r in LATITUDE_RANGES:
+        selected_examples["latitude_%d_to_%d" % r] = source_df["latitude"].apply(
+            lambda l: 1.0 if r[0] <= l < r[1] else 0.0  # if the sample is in the current tuple
+        )
+    return selected_examples
+
+
+selected_training_examples = select_and_transform_features(training_examples)
+selected_validation_examples = select_and_transform_features(validation_examples)
+
+#%% Train with selected features
 linear_regressor = train_model(
     learning_rate=0.01,
     steps=500,
     batch_size=5,
-    training_examples=minimal_training_examples,
+    training_examples=selected_training_examples,
     training_targets=training_targets,
-    validation_examples=minimal_validation_examples,
+    validation_examples=selected_validation_examples,
     validation_targets=validation_targets
 )
 
