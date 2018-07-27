@@ -1,3 +1,4 @@
+#%%
 import math
 from IPython import display
 from matplotlib import cm
@@ -9,17 +10,21 @@ from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
 
+#%%
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
 pd.options.display.float_format = '{:.1f}'.format
 
+#%%
 california_housing_dataframe = pd.read_csv("https://dl.google.com/mlcc/mledu-datasets/california_housing_train.csv",
                                            sep=",")
 
-# Shuffle the dataset.
+#%% Shuffle the dataset.
 california_housing_dataframe = california_housing_dataframe.reindex(
     np.random.permutation(california_housing_dataframe.index)
 )
+#%%
+
 
 def preprocess_features(california_housing_dataframe):
     """Prepares input features from California housing dataset.
@@ -64,12 +69,26 @@ def preprocess_targets(california_housing_dataframe):
         california_housing_dataframe["median_house_value"] / 1000.00)
     return output_targets
 
+#%%
+
 
 training_examples = preprocess_features(california_housing_dataframe.head(12000))
 training_targets = preprocess_targets(california_housing_dataframe.head(12000))
 
 validation_examples = preprocess_features(california_housing_dataframe.tail(5000))
 validation_targets = preprocess_targets(california_housing_dataframe.tail(5000))
+
+#%%
+print("Training examples summary:")
+display.display(training_examples.describe())
+print("Validation examples summary:")
+display.display(validation_examples.describe())
+
+print("Training targets summary:")
+display.display(training_targets.describe())
+print("Validation targets summary:")
+display.display(validation_targets.describe())
+#%%
 
 
 def plot_data_geographically(validation_examples, training_examples):
@@ -87,7 +106,8 @@ def plot_data_geographically(validation_examples, training_examples):
     plt.scatter(validation_examples["longitude"],
                 validation_examples["latitude"],
                 cmap="coolwarm",
-                c=validation_targets["median_house_value"] / validation_targets["median_house_value"].max())  # range 0-1
+                c=validation_targets["median_house_value"] /
+                validation_targets["median_house_value"].max())  # range 0-1
 
     ax = plt.subplot(1, 2, 2)
     ax.set_title("Training Data")
@@ -103,8 +123,12 @@ def plot_data_geographically(validation_examples, training_examples):
 
     _ = plt.plot()
 
+#%%
 
-# plot_data_geographically(validation_targets, training_examples)
+
+plot_data_geographically(validation_examples, training_examples)
+#%%
+
 
 def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
     """Trains a linear regression model of multiple features.
@@ -247,32 +271,68 @@ def train_model(
 
     return linear_regressor
 
+#%%
 
+correlation_dataframe = training_examples.copy()
+correlation_dataframe["target"] = training_targets["median_house_value"]
+
+correlation_dataframe = correlation_dataframe.corr()
+
+#%%
+
+
+
+
+
+minimal_features = [
+    "latitude",
+    "median_income",
+]
+assert minimal_features, "Must select at least one feature!"
+
+minimal_training_examples = training_examples[minimal_features]
+minimal_validation_examples = validation_examples[minimal_features]
+
+#%%
 linear_regressor = train_model(
-    learning_rate=0.00003,
+    learning_rate=0.01,
+    steps=500,
+    batch_size=5,
+    training_examples=minimal_training_examples,
+    training_targets=training_targets,
+    validation_examples=minimal_validation_examples,
+    validation_targets=validation_targets
+)
+
+
+#%% All features
+linear_regressor = train_model(
+    learning_rate=0.0003,
     steps=500,
     batch_size=5,
     training_examples=training_examples,
     training_targets=training_targets,
     validation_examples=validation_examples,
     validation_targets=validation_targets)
+#%%
+# california_housing_test_data = pd.read_csv(
+#     "https://dl.google.com/mlcc/mledu-datasets/california_housing_test.csv", sep=",")
+#
+# test_examples = preprocess_features(california_housing_test_data)
+# test_targets = preprocess_targets(california_housing_test_data)
+#
+# predict_test_input_fn = lambda: my_input_fn(
+#     features=test_examples,
+#     targets=test_targets["median_house_value"],
+#     num_epochs=1,
+#     shuffle=False
+# )
+#
+# test_predictions = linear_regressor.predict(input_fn=predict_test_input_fn)
+# test_predictions = np.array([item['predictions'][0] for item in test_predictions])
+#
+# test_root_mean_squared_error = math.sqrt(
+#     metrics.mean_squared_error(test_predictions, test_targets))
+#
+# print("Test RMSE: %0.2f" % test_root_mean_squared_error)
 
-california_housing_test_data = pd.read_csv("https://dl.google.com/mlcc/mledu-datasets/california_housing_test.csv", sep=",")
-
-test_examples = preprocess_features(california_housing_test_data)
-test_targets = preprocess_targets(california_housing_test_data)
-
-predict_test_input_fn = lambda: my_input_fn(
-    features=test_examples,
-    targets=test_targets["median_house_value"],
-    num_epochs=1,
-    shuffle=False
-)
-
-test_predictions = linear_regressor.predict(input_fn=predict_test_input_fn)
-test_predictions = np.array([item['predictions'][0] for item in test_predictions])
-
-test_root_mean_squared_error = math.sqrt(
-    metrics.mean_squared_error(test_predictions, test_targets))
-
-print("Test RMSE: %0.2f" % test_root_mean_squared_error)
