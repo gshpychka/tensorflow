@@ -1,4 +1,4 @@
-#%%
+#%% Imports
 import math
 from IPython import display
 from matplotlib import cm
@@ -10,12 +10,12 @@ from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
 
-#%%
+#%% Set options
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
 pd.options.display.float_format = '{:.1f}'.format
 
-#%%
+#%% Import the dataset
 california_housing_dataframe = pd.read_csv("https://dl.google.com/mlcc/mledu-datasets/california_housing_train.csv",
                                            sep=",")
 
@@ -23,7 +23,7 @@ california_housing_dataframe = pd.read_csv("https://dl.google.com/mlcc/mledu-dat
 california_housing_dataframe = california_housing_dataframe.reindex(
     np.random.permutation(california_housing_dataframe.index)
 )
-#%%
+#%% def preprocess_features() and preprocess_targets()
 
 
 def preprocess_features(california_housing_dataframe):
@@ -69,7 +69,7 @@ def preprocess_targets(california_housing_dataframe):
         california_housing_dataframe["median_house_value"] / 1000.00)
     return output_targets
 
-#%%
+#%% Assign training and validation examples and targets
 
 
 training_examples = preprocess_features(california_housing_dataframe.head(12000))
@@ -78,7 +78,7 @@ training_targets = preprocess_targets(california_housing_dataframe.head(12000))
 validation_examples = preprocess_features(california_housing_dataframe.tail(5000))
 validation_targets = preprocess_targets(california_housing_dataframe.tail(5000))
 
-#%%
+#%% Print summaries of training/validation examples/targets
 print("Training examples summary:")
 display.display(training_examples.describe())
 print("Validation examples summary:")
@@ -88,7 +88,7 @@ print("Training targets summary:")
 display.display(training_targets.describe())
 print("Validation targets summary:")
 display.display(validation_targets.describe())
-#%%
+#%% def plot_data_geographically
 
 
 def plot_data_geographically(validation_examples, training_examples):
@@ -123,11 +123,11 @@ def plot_data_geographically(validation_examples, training_examples):
 
     _ = plt.plot()
 
-#%%
+#%% Plot data geographically
 
 
 plot_data_geographically(validation_examples, training_examples)
-#%%
+#%% Define my_inpu_fn(), construct_feature_columns(), train_model()
 
 
 def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
@@ -271,17 +271,14 @@ def train_model(
 
     return linear_regressor
 
-#%%
+#%% Create a correlation dataframe
 
 correlation_dataframe = training_examples.copy()
 correlation_dataframe["target"] = training_targets["median_house_value"]
 
 correlation_dataframe = correlation_dataframe.corr()
 
-#%%
-
-
-
+#%% Create minimal features and examples from them
 
 
 minimal_features = [
@@ -293,7 +290,7 @@ assert minimal_features, "Must select at least one feature!"
 minimal_training_examples = training_examples[minimal_features]
 minimal_validation_examples = validation_examples[minimal_features]
 
-#%%
+#%% Train with minimal features
 linear_regressor = train_model(
     learning_rate=0.01,
     steps=500,
@@ -305,7 +302,7 @@ linear_regressor = train_model(
 )
 
 
-#%% All features
+#%% Train with all features
 linear_regressor = train_model(
     learning_rate=0.0003,
     steps=500,
