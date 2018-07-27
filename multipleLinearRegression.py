@@ -79,15 +79,15 @@ validation_examples = preprocess_features(california_housing_dataframe.tail(5000
 validation_targets = preprocess_targets(california_housing_dataframe.tail(5000))
 
 #%% Print summaries of training/validation examples/targets
-print("Training examples summary:")
-display.display(training_examples.describe())
-print("Validation examples summary:")
-display.display(validation_examples.describe())
-
-print("Training targets summary:")
-display.display(training_targets.describe())
-print("Validation targets summary:")
-display.display(validation_targets.describe())
+# print("Training examples summary:")
+# display.display(training_examples.describe())
+# print("Validation examples summary:")
+# display.display(validation_examples.describe())
+#
+# print("Training targets summary:")
+# display.display(training_targets.describe())
+# print("Validation targets summary:")
+# display.display(validation_targets.describe())
 #%% def plot_data_geographically
 
 
@@ -126,7 +126,7 @@ def plot_data_geographically(validation_examples, training_examples):
 #%% Plot data geographically
 
 
-plot_data_geographically(validation_examples, training_examples)
+#plot_data_geographically(validation_examples, training_examples)
 #%% Define my_inpu_fn(), construct_feature_columns(), train_model()
 
 
@@ -144,7 +144,8 @@ def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
         """
 
     # Conert pandas data into a dict of np arrays
-    features = {key:np.array(value) for key,value in dict(features).items()}
+    features = {key: np.array(value) for key, value in dict(features).items()}
+
 
     # Construct a dataset, and configure batching/repeating
     ds = Dataset.from_tensor_slices((features, targets))  # 2GB limit
@@ -321,14 +322,14 @@ linear_regressor = train_model(
 
 
 #%% Train with all features
-linear_regressor = train_model(
-    learning_rate=0.0003,
-    steps=500,
-    batch_size=5,
-    training_examples=training_examples,
-    training_targets=training_targets,
-    validation_examples=validation_examples,
-    validation_targets=validation_targets)
+# linear_regressor = train_model(
+#     learning_rate=0.0003,
+#     steps=500,
+#     batch_size=5,
+#     training_examples=training_examples,
+#     training_targets=training_targets,
+#     validation_examples=validation_examples,
+#     validation_targets=validation_targets)
 #%%
 # california_housing_test_data = pd.read_csv(
 #     "https://dl.google.com/mlcc/mledu-datasets/california_housing_test.csv", sep=",")
