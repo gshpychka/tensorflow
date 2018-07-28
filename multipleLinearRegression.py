@@ -78,17 +78,7 @@ training_targets = preprocess_targets(california_housing_dataframe.head(12000))
 validation_examples = preprocess_features(california_housing_dataframe.tail(5000))
 validation_targets = preprocess_targets(california_housing_dataframe.tail(5000))
 
-#%% Print summaries of training/validation examples/targets
-# print("Training examples summary:")
-# display.display(training_examples.describe())
-# print("Validation examples summary:")
-# display.display(validation_examples.describe())
-#
-# print("Training targets summary:")
-# display.display(training_targets.describe())
-# print("Validation targets summary:")
-# display.display(validation_targets.describe())
-#%% def plot_data_geographically
+#%% def plot_data_geographically()
 
 
 def plot_data_geographically(validation_examples, training_examples):
@@ -126,9 +116,9 @@ def plot_data_geographically(validation_examples, training_examples):
 #%% Plot data geographically
 
 
-#plot_data_geographically(validation_examples, training_examples)
-#%% Define my_inpu_fn(), construct_feature_columns(), train_model()
+plot_data_geographically(validation_examples, training_examples)
 
+#%% Define my_inpu_fn(), construct_feature_columns(), train_model()
 
 def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
     """Trains a linear regression model of multiple features.
@@ -272,6 +262,7 @@ def train_model(
     return linear_regressor
 
 #%% Create a correlation dataframe
+
 
 correlation_dataframe = training_examples.copy()
 correlation_dataframe["target"] = training_targets["median_house_value"]
