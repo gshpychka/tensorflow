@@ -143,9 +143,8 @@ def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
           Tuple of (features, labels) for next data batch
         """
 
-    # Conert pandas data into a dict of np arrays
+    # Convert pandas data into a dict of np arrays
     features = {key: np.array(value) for key, value in dict(features).items()}
-
 
     # Construct a dataset, and configure batching/repeating
     ds = Dataset.from_tensor_slices((features, targets))  # 2GB limit
@@ -293,10 +292,9 @@ minimal_validation_examples = validation_examples[minimal_features]
 
 #%% Latitude binning
 
-LATITUDE_RANGES = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
-
 
 def select_and_transform_features(source_df):
+    LATITUDE_RANGES = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
     selected_examples = pd.DataFrame()
     selected_examples["median_income"] = source_df['median_income']
     for r in LATITUDE_RANGES:
@@ -311,7 +309,7 @@ selected_validation_examples = select_and_transform_features(validation_examples
 
 #%% Train with selected features
 linear_regressor = train_model(
-    learning_rate=0.01,
+    learning_rate=0.03,
     steps=500,
     batch_size=5,
     training_examples=selected_training_examples,
