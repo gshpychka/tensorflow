@@ -113,10 +113,6 @@ def plot_data_geographically(validation_examples, training_examples):
 
     _ = plt.plot()
 
-#%% Plot data geographically
-
-
-plot_data_geographically(validation_examples, training_examples)
 
 #%% Define my_inpu_fn(), construct_feature_columns(), train_model()
 
@@ -285,10 +281,12 @@ minimal_validation_examples = validation_examples[minimal_features]
 
 
 def select_and_transform_features(source_df):
-    LATITUDE_RANGES = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
+    latitude_ranges = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
     selected_examples = pd.DataFrame()
-    selected_examples["median_income"] = source_df['median_income']
-    for r in LATITUDE_RANGES:
+    selected_examples["median_income"] = source_df["median_income"]
+    selected_examples["housing_median_age"] = source_df["housing_median_age"]
+    selected_examples["households"] = source_df["households"]
+    for r in latitude_ranges:
         selected_examples["latitude_%d_to_%d" % r] = source_df["latitude"].apply(
             lambda l: 1.0 if r[0] <= l < r[1] else 0.0  # if the sample is in the current tuple
         )
@@ -309,6 +307,10 @@ linear_regressor = train_model(
     validation_targets=validation_targets
 )
 
+# %% Plot data geographically
+
+
+plot_data_geographically(validation_examples, training_examples)
 
 #%% Train with all features
 # linear_regressor = train_model(
