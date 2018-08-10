@@ -198,7 +198,7 @@ def train_model(
     periods = 10
     steps_per_period = steps / periods
 
-    my_optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+    my_optimizer = tf.train.FtrlOptimizer(learning_rate=learning_rate)
     my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
     linear_regressor = tf.estimator.LinearRegressor(
         feature_columns=construct_feature_columns(training_examples),
