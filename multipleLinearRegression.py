@@ -116,7 +116,7 @@ def plot_data_geographically(validation_examples, training_examples):
 #%% Plot data geographically
 
 
-plot_data_geographically(validation_examples, training_examples)
+# plot_data_geographically(validation_examples, training_examples)
 
 
 # %% Define my_input_fn(), construct_feature_columns()
@@ -151,16 +151,50 @@ def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
     return features, labels
 
 
-def construct_feature_columns(input_features):
+def construct_feature_columns(training_examples):
     """Construct the TensorFlow Feature Columns.
-
-      Args:
-        input_features: The names of the numerical input features to use.
-      Returns:
+    Args:
+        training_examples: a Dataframe with the training examples
+    Returns:
         A set of feature columns
     """
+    households = tf.feature_column.numeric_column("households")
+    longitude = tf.feature_column.numeric_column("longitude")
+    latitude = tf.feature_column.numeric_column("latitude")
+    housing_median_age = tf.feature_column.numeric_column("housing_median_age")
+    median_income = tf.feature_column.numeric_column("median_income")
+    rooms_per_person = tf.feature_column.numeric_column("rooms_per_person")
 
-    return set([tf.feature_column.numeric_column(my_feature) for my_feature in input_features])
+    # Divide households into 7 buckets
+    bucketized_households = tf.feature_column.bucketized_column(
+        households,
+        boundaires=get_quantile_based_boundaries(training_examples["households"], 7))
+    bucketized_longtitude = tf.feature_column.bucketized_column(
+        longitude,
+        boundaires=get_quantile_based_boundaries(training_examples["longitude"], 7))
+    bucketized_latitude = tf.feature_column.bucketized_column(
+        latitude,
+        boundaires=get_quantile_based_boundaries(training_examples["latitude"], 7))
+    bucketized_housing_median_age = tf.feature_column.bucketized_column(
+        housing_median_age,
+        boundaires=get_quantile_based_boundaries(training_examples["housing_median_age"], 7))
+    bucketized_median_income = tf.feature_column.bucketized_column(
+        median_income,
+        boundaires=get_quantile_based_boundaries(training_examples["median_income"], 7))
+    bucketized_rooms_per_person = tf.feature_column.bucketized_column(
+        rooms_per_person,
+        boundaires=get_quantile_based_boundaries(training_examples["rooms_per_person"], 7))
+
+    feature_columns = [
+        bucketized_longtitude,
+        bucketized_latitude,
+        bucketized_housing_median_age,
+        bucketized_households,
+        bucketized_median_income,
+        bucketized_rooms_per_person
+    ]
+
+    return feature_columns
 
 
 #%% Define train_model()
@@ -168,6 +202,7 @@ def train_model(
         learning_rate,
         steps,
         batch_size,
+        feature_columns,
         training_examples,
         training_targets,
         validation_examples,
@@ -198,10 +233,10 @@ def train_model(
     periods = 10
     steps_per_period = steps / periods
 
-    my_optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+    my_optimizer = tf.train.FtrlOptimizer(learning_rate=learning_rate)
     my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
     linear_regressor = tf.estimator.LinearRegressor(
-        feature_columns=construct_feature_columns(training_examples),
+        feature_columns=feature_columns,
         optimizer=my_optimizer
     )
 
@@ -272,43 +307,26 @@ correlation_dataframe["target"] = training_targets["median_house_value"]
 
 correlation_dataframe = correlation_dataframe.corr()
 
-#%% Create minimal features and examples from them
+
+# %% def get_quantile_based_boundaries()
 
 
-minimal_features = [
-    "latitude",
-    "median_income",
-]
-assert minimal_features, "Must select at least one feature!"
+def get_quantile_based_boundaries(feature_values, num_buckets):
+    boundaries = np.arange(1.0, num_buckets) / num_buckets
+    quantiles = feature_values.quantile(boundaries)
+    return [quantiles[q] for q in quantiles.keys()]
 
-minimal_training_examples = training_examples[minimal_features]
-minimal_validation_examples = validation_examples[minimal_features]
-
-#%% Latitude binning
-
-
-def select_and_transform_features(source_df):
-    LATITUDE_RANGES = zip(range(32, 44), range(33, 45))  # Will create tuples like (32,33), (33,34), etc
-    selected_examples = pd.DataFrame()
-    selected_examples["median_income"] = source_df['median_income']
-    for r in LATITUDE_RANGES:
-        selected_examples["latitude_%d_to_%d" % r] = source_df["latitude"].apply(
-            lambda l: 1.0 if r[0] <= l < r[1] else 0.0  # if the sample is in the current tuple
-        )
-    return selected_examples
-
-
-selected_training_examples = select_and_transform_features(training_examples)
-selected_validation_examples = select_and_transform_features(validation_examples)
 
 #%% Train with selected features
+
 linear_regressor = train_model(
-    learning_rate=0.03,
+    learning_rate=1,
     steps=500,
-    batch_size=5,
-    training_examples=selected_training_examples,
+    batch_size=100,
+    feature_columns=construct_feature_columns(training_examples),
+    training_examples=training_examples,
     training_targets=training_targets,
-    validation_examples=selected_validation_examples,
+    validation_examples=validation_examples,
     validation_targets=validation_targets
 )
 
