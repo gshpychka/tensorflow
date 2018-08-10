@@ -118,7 +118,9 @@ def plot_data_geographically(validation_examples, training_examples):
 
 plot_data_geographically(validation_examples, training_examples)
 
-#%% Define my_inpu_fn(), construct_feature_columns(), train_model()
+
+# %% Define my_inpu_fn(), construct_feature_columns()
+
 
 def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
     """Trains a linear regression model of multiple features.
@@ -161,6 +163,7 @@ def construct_feature_columns(input_features):
     return set([tf.feature_column.numeric_column(my_feature) for my_feature in input_features])
 
 
+#%% Define train_model()
 def train_model(
         learning_rate,
         steps,
@@ -340,4 +343,3 @@ linear_regressor = train_model(
 #     metrics.mean_squared_error(test_predictions, test_targets))
 #
 # print("Test RMSE: %0.2f" % test_root_mean_squared_error)
-
