@@ -119,7 +119,7 @@ def plot_data_geographically(validation_examples, training_examples):
 plot_data_geographically(validation_examples, training_examples)
 
 
-# %% Define my_inpu_fn(), construct_feature_columns()
+# %% Define my_input_fn(), construct_feature_columns()
 
 
 def my_input_fn(features, targets, batch_size=1, shuffle=True, num_epochs=None):
