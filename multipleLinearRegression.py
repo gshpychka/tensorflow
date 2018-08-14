@@ -168,22 +168,22 @@ def construct_feature_columns(training_examples):
     # Divide households into 7 buckets
     bucketized_households = tf.feature_column.bucketized_column(
         households,
-        boundaires=get_quantile_based_boundaries(training_examples["households"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["households"], 7))
     bucketized_longtitude = tf.feature_column.bucketized_column(
         longitude,
-        boundaires=get_quantile_based_boundaries(training_examples["longitude"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["longitude"], 7))
     bucketized_latitude = tf.feature_column.bucketized_column(
         latitude,
-        boundaires=get_quantile_based_boundaries(training_examples["latitude"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["latitude"], 7))
     bucketized_housing_median_age = tf.feature_column.bucketized_column(
         housing_median_age,
-        boundaires=get_quantile_based_boundaries(training_examples["housing_median_age"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["housing_median_age"], 7))
     bucketized_median_income = tf.feature_column.bucketized_column(
         median_income,
-        boundaires=get_quantile_based_boundaries(training_examples["median_income"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["median_income"], 7))
     bucketized_rooms_per_person = tf.feature_column.bucketized_column(
         rooms_per_person,
-        boundaires=get_quantile_based_boundaries(training_examples["rooms_per_person"], 7))
+        boundaries=get_quantile_based_boundaries(training_examples["rooms_per_person"], 7))
 
     feature_columns = [
         bucketized_longtitude,
@@ -296,7 +296,7 @@ def train_model(
     plt.plot(training_rmse, label="training")
     plt.plot(validation_rmse, label="validation")
     plt.legend()
-
+    plt.show()
     return linear_regressor
 
 #%% Create a correlation dataframe
