@@ -5,7 +5,7 @@ D = np.random.randn(1000, 500)
 
 # 10 hidden layers with 500 neurons in each
 hidden_layer_sizes = [500] * 10
-nonlinearities = ['tanh']*len(hidden_layer_sizes)
+nonlinearities = ['relu']*len(hidden_layer_sizes)
 
 
 act = {'relu':lambda x:np.maximum(0,x), 'tanh':lambda x:np.tanh(x)}
@@ -14,7 +14,7 @@ for i in range(len(hidden_layer_sizes)):
     X = D if i == 0 else Hs[i - 1]
     fan_in = X.shape[1]
     fan_out = hidden_layer_sizes[i]
-    W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in)
+    W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in/2)
 
     H = np.dot(X, W)
     H = act[nonlinearities[i]](H)
