@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 D = np.random.randn(1000, 500)
+
+# 10 hidden layers with 500 neurons in each
 hidden_layer_sizes = [500] * 10
 nonlinearities = ['tanh']*len(hidden_layer_sizes)
 
@@ -9,15 +11,15 @@ nonlinearities = ['tanh']*len(hidden_layer_sizes)
 act = {'relu':lambda x:np.maximum(0,x), 'tanh':lambda x:np.tanh(x)}
 Hs = {}
 for i in range(len(hidden_layer_sizes)):
-    fan_in = hidden_layer_sizes[i-1]
-    fan_out = hidden_layer_sizes[i]
-    W = np.random.randn(fan_in, fan_out) * 0.01
-
-for i in range(len(hidden_layer_sizes)):
     X = D if i == 0 else Hs[i - 1]
+    fan_in = X.shape[1]
+    fan_out = hidden_layer_sizes[i]
+    W = np.random.randn(fan_in, fan_out) / np.sqrt(fan_in)
+
     H = np.dot(X, W)
     H = act[nonlinearities[i]](H)
     Hs[i] = H
+
 
 print('input layer had mean %f and std %f' % (np.mean(D),np.std(D)))
 layer_means = [np.mean(H) for i,H in Hs.items()]
